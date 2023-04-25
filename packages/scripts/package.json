@@ -51,7 +51,7 @@
 		"fs-extra": "^11.1.0",
 		"tslib": "^2.5.0",
 		"undici": "^5.20.0",
-		"yaml": "^2.2.1"
+		"yaml": "^2.2.2"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.1",
