@@ -2,7 +2,13 @@ import type { ApiClass, ApiInterface, Excerpt } from '@microsoft/api-extractor-m
 import { ApiItemKind } from '@microsoft/api-extractor-model';
 import { ExcerptText } from '../ExcerptText';
 
-export function HierarchyText({ item, type }: { item: ApiClass | ApiInterface; type: 'Extends' | 'Implements' }) {
+export function HierarchyText({
+	item,
+	type,
+}: {
+	readonly item: ApiClass | ApiInterface;
+	readonly type: 'Extends' | 'Implements';
+}) {
 	const model = item.getAssociatedModel()!;
 
 	if (
@@ -41,9 +47,9 @@ export function HierarchyText({ item, type }: { item: ApiClass | ApiInterface; t
 	return (
 		<div className="flex flex-row place-items-center gap-4">
 			<h3 className="text-xl font-bold">{type}</h3>
-			<span className="space-y-2 break-all font-mono">
-				{excerpts.map((excerpt, index) => (
-					<ExcerptText excerpt={excerpt} key={index} model={model} />
+			<span className="break-all font-mono space-y-2">
+				{excerpts.map((excerpt, idx) => (
+					<ExcerptText excerpt={excerpt} key={idx} model={model} />
 				))}
 			</span>
 		</div>

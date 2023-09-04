@@ -10,7 +10,8 @@ import {
 	type GatewayIntentBits,
 	type GatewaySendPayload,
 } from 'discord-api-types/v10';
-import type { IShardingStrategy } from '../strategies/sharding/IShardingStrategy';
+import type { IShardingStrategy } from '../strategies/sharding/IShardingStrategy.js';
+import type { IIdentifyThrottler } from '../throttling/IIdentifyThrottler.js';
 import { DefaultWebSocketManagerOptions, type CompressionMethod, type Encoding } from '../utils/constants.js';
 import type { WebSocketShardDestroyOptions, WebSocketShardEventsMap } from './WebSocketShard.js';
 
@@ -55,7 +56,7 @@ export interface RequiredWebSocketManagerOptions {
 	/**
 	 * The intents to request
 	 */
-	intents: GatewayIntentBits;
+	intents: GatewayIntentBits | 0;
 	/**
 	 * The REST instance to use for fetching gateway information
 	 */
@@ -70,6 +71,10 @@ export interface RequiredWebSocketManagerOptions {
  * Optional additional configuration for the WebSocketManager
  */
 export interface OptionalWebSocketManagerOptions {
+	/**
+	 * Builds an identify throttler to use for this manager's shards
+	 */
+	buildIdentifyThrottler(manager: WebSocketManager): Awaitable<IIdentifyThrottler>;
 	/**
 	 * Builds the strategy to use for sharding
 	 *
@@ -229,7 +234,8 @@ export class WebSocketManager extends AsyncEventEmitter<ManagerShardEventsMap> {
 
 		const data = (await this.options.rest.get(Routes.gatewayBot())) as RESTGetAPIGatewayBotResult;
 
-		this.gatewayInformation = { data, expiresAt: Date.now() + data.session_start_limit.reset_after };
+		// For single sharded bots session_start_limit.reset_after will be 0, use 5 seconds as a minimum expiration time
+		this.gatewayInformation = { data, expiresAt: Date.now() + (data.session_start_limit.reset_after || 5_000) };
 		return this.gatewayInformation.data;
 	}
 

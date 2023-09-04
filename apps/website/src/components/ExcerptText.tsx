@@ -1,5 +1,6 @@
 import type { ApiModel, Excerpt } from '@microsoft/api-extractor-model';
 import { ExcerptTokenKind } from '@microsoft/api-extractor-model';
+import { DISCORD_API_TYPES_DOCS_URL } from '~/util/constants';
 import { ItemLink } from './ItemLink';
 import { resolveItemURI } from './documentation/util';
 
@@ -7,11 +8,11 @@ export interface ExcerptTextProps {
 	/**
 	 * The tokens to render.
 	 */
-	excerpt: Excerpt;
+	readonly excerpt: Excerpt;
 	/**
 	 * The model to resolve item references from.
 	 */
-	model: ApiModel;
+	readonly model: ApiModel;
 }
 
 /**
@@ -19,9 +20,25 @@ export interface ExcerptTextProps {
  */
 export function ExcerptText({ model, excerpt }: ExcerptTextProps) {
 	return (
-		<>
-			{excerpt.spannedTokens.map((token) => {
+		<span>
+			{excerpt.spannedTokens.map((token, idx) => {
 				if (token.kind === ExcerptTokenKind.Reference) {
+					const source = token.canonicalReference?.source;
+
+					if (source && 'packageName' in source && source.packageName === 'discord-api-types') {
+						const meaning = token.canonicalReference.symbol?.meaning;
+						const href =
+							meaning === 'type'
+								? `${DISCORD_API_TYPES_DOCS_URL}#${token.text}`
+								: `${DISCORD_API_TYPES_DOCS_URL}/${meaning}/${token.text}`;
+
+						return (
+							<a className="text-blurple" href={href} key={idx} rel="external noreferrer noopener" target="_blank">
+								{token.text}
+							</a>
+						);
+					}
+
 					const item = model.resolveDeclarationReference(token.canonicalReference!, model).resolvedApiItem;
 
 					if (!item) {
@@ -29,7 +46,12 @@ export function ExcerptText({ model, excerpt }: ExcerptTextProps) {
 					}
 
 					return (
-						<ItemLink className="text-blurple" itemURI={resolveItemURI(item)} key={item.containerKey}>
+						<ItemLink
+							className="text-blurple"
+							itemURI={resolveItemURI(item)}
+							key={`${item.displayName}-${item.containerKey}-${idx}`}
+							packageName={item.getAssociatedPackage()?.displayName.replace('@discordjs/', '')}
+						>
 							{token.text}
 						</ItemLink>
 					);
@@ -37,6 +59,6 @@ export function ExcerptText({ model, excerpt }: ExcerptTextProps) {
 
 				return token.text;
 			})}
-		</>
+		</span>
 	);
 }

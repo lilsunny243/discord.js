@@ -389,7 +389,7 @@ class ApplicationCommand extends Base {
       // TODO: remove ?? 0 on each when nullable
       (command.options?.length ?? 0) !== (this.options?.length ?? 0) ||
       defaultMemberPermissions !== (this.defaultMemberPermissions?.bitfield ?? null) ||
-      (typeof dmPermission !== 'undefined' && dmPermission !== this.dmPermission) ||
+      (dmPermission !== undefined && dmPermission !== this.dmPermission) ||
       !isEqual(command.nameLocalizations ?? command.name_localizations ?? {}, this.nameLocalizations ?? {}) ||
       !isEqual(
         command.descriptionLocalizations ?? command.description_localizations ?? {},
@@ -602,5 +602,5 @@ module.exports = ApplicationCommand;
 
 /**
  * @external ApplicationCommandOptionAllowedChannelTypes
- * @see {@link https://discord.js.org/#/docs/builders/main/typedef/ApplicationCommandOptionAllowedChannelTypes}
+ * @see {@link https://discord.js.org/docs/packages/builders/stable/ApplicationCommandOptionAllowedChannelTypes:TypeAlias}
  */
